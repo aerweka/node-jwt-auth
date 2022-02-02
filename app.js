@@ -15,8 +15,7 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 // database connection
-const dbURI =
-  "mongodb+srv://aerweka:testing123@cluster0.ul8wj.mongodb.net/node-jwt";
+const dbURI = process.env.DB_URL;
 mongoose
   .connect(dbURI, {
     useNewUrlParser: true,
@@ -24,7 +23,7 @@ mongoose
     useCreateIndex: true,
   })
   .then((result) =>
-    app.listen(3000, () => {
+    app.listen(process.env.PORT || 3000, () => {
       console.log("Server running");
     })
   )
