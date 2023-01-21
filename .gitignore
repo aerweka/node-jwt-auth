@@ -1,6 +1,9 @@
 # Env file
 .env
 
+# vscode config
+.vscode
+
 # Logs
 logs
 *.log

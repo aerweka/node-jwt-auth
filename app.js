@@ -1,6 +1,7 @@
 const express = require("express");
-const mongoose = require("mongoose");
+const client = require("./config/dbConnection");
 const authRoutes = require("./routes/authentication");
+const bookRoutes = require("./routes/book");
 const cookieParser = require("cookie-parser");
 const { requireAuth, checkUser } = require("./middlewares/authMiddleware");
 
@@ -14,23 +15,22 @@ app.use(cookieParser());
 // view engine
 app.set("view engine", "ejs");
 
-// database connection
-const dbURI = process.env.DB_URL;
-mongoose
-  .connect(dbURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
+const db = require("./models")
+db.sequelize.sync({ force: true })
+  .then(() => {
+    console.log("DB synced");
   })
-  .then((result) =>
-    app.listen(process.env.PORT || 3000, () => {
-      console.log("Server running");
-    })
-  )
-  .catch((err) => console.log(err));
+  .catch((err) => {
+    console.log(`Failed to sync : ${err.message}`);
+  })
 
 // routes
 app.get("*", checkUser);
 app.get("/", (req, res) => res.render("home"));
 app.get("/smoothies", requireAuth, (req, res) => res.render("smoothies"));
 app.use(authRoutes);
+app.use("/api/books", bookRoutes);
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Server running");
+})
