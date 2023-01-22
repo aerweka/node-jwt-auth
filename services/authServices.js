@@ -1,71 +1,65 @@
-const User = require("../models/User");
-const jwt = require("jsonwebtoken");
-
-const handleErrors = (err) => {
-    console.log(err);
-    let errors = {
-        email: "",
-        password: "",
-    };
-
-    if (err.message === "unregistered email") {
-        errors.email = "Tha email is not registered";
-    }
-    if (err.message === "incorrect password") {
-        errors.password = "Tha password is incorrect";
-    }
-
-    if (err.message.includes("User validation failed")) {
-        Object.values(err.errors).forEach(({ properties }) => {
-            errors[properties.path] = properties.message;
-        });
-    }
-
-    if (err.code === 11000) {
-        errors["email"] = "Email is already registered";
-        return errors;
-    }
-
-    return errors;
-};
+const db = require("../models");
+const User = db.user
+const Op = db.Sequelize.Op
+const { createToken } = require("../utils/jwtUtils")
+const response = require("../utils/responseTemplate");
+const bcrypt = require("bcrypt");
+require("dotenv").config();
 
 const signup = async (req, res) => {
     const { email, password } = req.body;
-    try {
-        const newUser = await User.create({ email, password });
-        const token = createToken(newUser._id);
-        res.cookie("jwt", token, {
-            httpOnly: true,
-            maxAge: maxAge * 1000,
-        });
-        return res.status(201).json({ user: newUser._id });
-    } catch (error) {
-        const errors = handleErrors(error);
-        return res.status(400).json({ errors });
-    }
+
+    if (!email) return res.status(400).send(response(null, "Please insert the email", 400))
+
+    if (!password) return res.status(400).send(response(null, "Please insert the password", 400))
+
+    await User.findOne({ where: { email: email } })
+        .then(data => {
+            if (data) return res.status(201).send(response(null, "Email already registered", 201))
+        })
+
+    await User.create(req.body)
+        .then(data => {
+            const token = createToken(data.id);
+            res.cookie("jwt", token, {
+                httpOnly: true,
+                maxAge: parseInt(process.env.MAXAGE_JWT, 10) * 1000,
+            });
+            res.status(201).send(response({ token: token }, "User signed up successfully", 201))
+        })
+        .catch(err => {
+            res.status(500).send(response(null, err.message || "Some error occurred while signing up", 500))
+        })
 }
 
 const signin = async (req, res) => {
     const { email, password } = req.body;
 
-    try {
-        const user = await User.login(email, password);
-        const token = createToken(user._id);
-        res.cookie("jwt", token, {
-            httpOnly: true,
-            maxAge: maxAge * 1000,
-        });
-        return res.status(200).json({ user: user._id });
-    } catch (error) {
-        const errors = handleErrors(error);
-        return res.status(400).json({ errors });
-    }
+    if (!email) return res.status(400).send(response(null, "Please insert the email", 400))
+
+    if (!password) return res.status(400).send(response(null, "Please insert the password", 400))
+
+    User.findOne({ where: { email } })
+        .then(data => {
+            if (data) {
+                const auth = bcrypt.compare(password, data.password);
+                if (auth) {
+                    const token = createToken(data.id);
+                    res.cookie("jwt", token, {
+                        httpOnly: true,
+                        maxAge: parseInt(process.env.MAXAGE_JWT, 10) * 1000,
+                    });
+                    res.status(200).send(response({ token: token }, "User signed in successfully", 200))
+                }
+            } else {
+                res.status(404).send(response(null, "Unregistered email, please sign up!", 404))
+            }
+        })
+        .catch(err => {
+            res.status(500).send(response(null, err.message || "Some error occurred while creating book", 500))
+        })
 }
 
-const createToken = (id) => {
-    return jwt.sign({ id }, process.env.SECRET_JWT, {
-        expiresIn: maxAge,
-    });
-};
+
 
 module.exports = { signup, signin }

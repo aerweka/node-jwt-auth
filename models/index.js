@@ -20,5 +20,6 @@ db.Sequelize = Sequelize
 db.sequelize = sequelize
 db.books = require("./Book")(sequelize, Sequelize)
 db.author = require("./Author")(sequelize, Sequelize)
+db.user = require("./User")(sequelize, Sequelize)
 
 module.exports = db
