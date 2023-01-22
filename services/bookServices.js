@@ -35,25 +35,14 @@ const getById = (req, res) => {
 const create = (req, res) => {
     const { title, price, pages, author_id } = req.body
 
-    if (!title) {
-        res.status(400).send(response(null, "Please insert the title", 400))
-        return
-    }
+    if (!title) return res.status(400).send(response(null, "Please insert the title", 400))
 
-    if (!price) {
-        res.status(400).send(response(null, "Please insert the price", 400))
-        return
-    }
+    if (!price) return res.status(400).send(response(null, "Please insert the price", 400))
 
-    if (!pages) {
-        res.status(400).send(response(null, "Please insert the pages", 400))
-        return
-    }
+    if (!pages) return res.status(400).send(response(null, "Please insert the pages", 400))
 
-    if (!author_id) {
-        res.status(400).send(response(null, "Please insert the author", 400))
-        return
-    }
+    if (!author_id) return res.status(400).send(response(null, "Please insert the author", 400))
+
 
     Book.create(req.body)
         .then(data => {
