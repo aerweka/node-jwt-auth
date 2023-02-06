@@ -1,7 +1,13 @@
 const bcrypt = require("bcrypt");
+const rent = require("./Rent")
 // const { isEmail } = require("validator");
 module.exports = (sequelize, Sequelize) => {
   const User = sequelize.define("users", {
+    id: {
+      type: Sequelize.UUID,
+      defaultValue: Sequelize.UUIDV4,
+      primaryKey: true
+    },
     name: {
       type: Sequelize.STRING,
     },
@@ -29,6 +35,13 @@ module.exports = (sequelize, Sequelize) => {
       }
     },
   })
+  // .hasMany(rent)
+
+  User.associate = models => {
+    User.hasMany(models.Rent, {
+      onDelete: "cascade"
+    })
+  }
 
   return User
 }

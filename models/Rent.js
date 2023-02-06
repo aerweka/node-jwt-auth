@@ -1,45 +1,41 @@
-const author = require("./Author")
+const user = require("./User");
 module.exports = (sequelize, Sequelize) => {
-    const Book = sequelize.define("books", {
+    const Rent = sequelize.define("rents", {
         id: {
             type: Sequelize.UUID,
             defaultValue: Sequelize.UUIDV4,
             primaryKey: true
         },
-        title: {
-            type: Sequelize.STRING,
-        },
-        price: {
-            type: Sequelize.BIGINT,
-        },
-        pages: {
-            type: Sequelize.INTEGER
-        },
-        author_id: {
+        user_id: {
             type: Sequelize.UUID,
             references: {
-                model: 'authors',
+                model: 'users',
                 key: 'id'
             }
+        },
+        rent_hours: {
+            type: Sequelize.INTEGER,
+        },
+        returning_timestamps: {
+            type: Sequelize.DATE
         },
         is_deleted: {
             type: Sequelize.BOOLEAN,
             defaultValue: false
         }
     })
-    // .belongsTo(author)
-
-    Book.associate = models => {
-        Book.belongsTo(models.Author, {
+    // .belongsTo(user)
+    Rent.associate = models => {
+        Rent.belongsTo(models.User, {
             foreignKey: {
                 allowNull: false
             }
         })
 
-        Book.belongsToMany(models.Rent, {
+        Rent.belongsToMany(models.Book, {
             through: models.RentedBooks
         })
     }
 
-    return Book
+    return Rent
 }
