@@ -6,7 +6,7 @@ const {
     update,
     softDelete,
     hardDelete
-} = require("../controllers/rentConroller");
+} = require("../controllers/rentController");
 
 const router = Router()
 

@@ -43,8 +43,7 @@ const create = (req, res) => {
 
     if (!author_id) return res.status(400).send(response(null, "Please insert the author", 400))
 
-
-    Book.create(req.body)
+    Book.create({ ...req.body, cover_img: req.file.path })
         .then(data => {
             res.status(201).send(response(data, "Book inserted successfully", 201))
         }).catch(err => {

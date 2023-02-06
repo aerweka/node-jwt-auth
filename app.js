@@ -18,7 +18,7 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const db = require("./models")
-db.sequelize.sync({ force: true })
+db.sequelize.sync()
   .then(() => {
     console.log("DB synced");
   })

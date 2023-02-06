@@ -15,6 +15,10 @@ module.exports = (sequelize, Sequelize) => {
         pages: {
             type: Sequelize.INTEGER
         },
+        cover_img: {
+            type: Sequelize.STRING,
+            allowNull: true
+        },
         author_id: {
             type: Sequelize.UUID,
             references: {
